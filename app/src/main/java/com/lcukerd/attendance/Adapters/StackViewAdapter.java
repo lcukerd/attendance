@@ -48,9 +48,9 @@ public class StackViewAdapter extends BaseAdapter
         {
             convertView = mInflater.inflate(R.layout.items, parent, false);
             holder = new ViewHolder();
-            holder.name = (TextView) convertView.findViewById(R.id.nameT);
-            holder.rollno = (TextView) convertView.findViewById(R.id.rollnoT);
-            holder.comment = (TextView) convertView.findViewById(R.id.cmtT);
+            holder.name = convertView.findViewById(R.id.nameT);
+            holder.rollno = convertView.findViewById(R.id.rollnoT);
+            holder.comment = convertView.findViewById(R.id.cmtT);
 
             convertView.setTag(holder);
         } else

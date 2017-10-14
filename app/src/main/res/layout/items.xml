@@ -19,7 +19,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:text="5"
-            android:textSize="270sp"/>
+            android:textSize="250sp"/>
 
         <TextView
                 android:id="@+id/nameT"
