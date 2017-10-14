@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/rollnoT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:text="5"
+            android:textSize="270sp"/>
+
+        <TextView
+                android:id="@+id/nameT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rollnoT"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:text="Harshit Kumar"
+                android:textSize="30sp"/>
+
+            <TextView
+                android:id="@+id/cmtT"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:alpha="0"
+                android:background="@android:color/holo_red_light"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="Ab"
+                android:textSize="200sp"/>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+</FrameLayout>
