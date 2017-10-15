@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.lcukerd.attendance.Models.GridViewData;
 import com.lcukerd.attendance.Models.StackViewData;
 
 import java.io.ByteArrayOutputStream;
@@ -34,30 +35,63 @@ public class DbInteract
         dBcontract = new eventDBcontract(context);
     }
 
-    public ArrayList<StackViewData> readReport()
+    public Object readReport(int n)
     {
         SQLiteDatabase db = dBcontract.getReadableDatabase();
+        ArrayList<StackViewData> students0;
+        ArrayList<GridViewData> students1;
         Cursor cursor = db.query(eventDBcontract.ListofItem.tableName2,
                 projection, null, null, null, null, eventDBcontract.ListofItem.columnName + " ASC");
-        ArrayList<StackViewData> students = new ArrayList<>();
-        while (cursor.moveToNext())
-            students.add(new StackViewData
-                    (cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)),
-                            cursor.getPosition()+1));
-        Log.d(tag, "Returned " + String.valueOf(cursor.getCount()) + " students");
-        return students;
+        if (n == 0)
+        {
+            students0 = new ArrayList<>();
+            while (cursor.moveToNext())
+                students0.add(new StackViewData
+                        (cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)),
+                                cursor.getPosition() + 1));
+            Log.d(tag, "Returned " + String.valueOf(cursor.getCount()) + " students");
+            return students0;
+        } else if (n == 1)
+        {
+            students1 = new ArrayList<>();
+            while (cursor.moveToNext())
+                students1.add(new GridViewData
+                        (cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)),
+                                cursor.getPosition() + 1, getAPerc(cursor.getString(
+                                cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)), db)));
+            Log.d(tag, "Returned " + String.valueOf(cursor.getCount()) + " students");
+            return students1;
+        }
+        return null;
     }
+
+    private int getAPerc(String name, SQLiteDatabase db)
+    {
+        Cursor cursor = db.query(eventDBcontract.ListofItem.tableName1,
+                new String[]{name}, null, null, null, null, null);
+        int total = cursor.getCount();
+        int present = 0;
+        while (cursor.moveToNext())
+            if (cursor.getInt(cursor.getColumnIndex(name)) == 1)
+                present++;
+        if (total==0)
+            return 0;
+        else
+            return present / total*100;
+    }
+
 
     public void createtable(ArrayList<String> names)
     {
         SQLiteDatabase db = dBcontract.getWritableDatabase();
-        db.delete(eventDBcontract.ListofItem.tableName2,null,null);
+        db.delete(eventDBcontract.ListofItem.tableName2, null, null);
         db.execSQL("DROP TABLE IF EXISTS " + eventDBcontract.ListofItem.tableName1);
 
         for (int i = 0; i < names.size(); i++)
         {
             ContentValues values = new ContentValues();
-            values.put(eventDBcontract.ListofItem.columnName, names.get(i));
+            String temp = names.get(i).replace(' ', '_');
+            values.put(eventDBcontract.ListofItem.columnName, temp);
             db.insert(eventDBcontract.ListofItem.tableName2, null, values);
         }
 
@@ -72,20 +106,14 @@ public class DbInteract
         String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + eventDBcontract.ListofItem.tableName1 + " (" +
                         eventDBcontract.ListofItem.columndate + " INTEGER, ";
-        String temp=null;
+        String temp = null;
         for (int i = 0; i < names.size() - 1; i++)
         {
-            if (names.get(i).equals(temp))
-            {
-                temp = names.get(i).replace(' ','_');
-                temp = "m_" + temp;
-            }
-            else
-                temp = names.get(i).replace(' ','_');
+            temp = names.get(i);
             SQL_CREATE_ENTRIES += (temp + " INTEGER, ");
         }
 
-        SQL_CREATE_ENTRIES += (names.get(names.size() - 1) + " INTEGER );");
+        SQL_CREATE_ENTRIES += (names.get(names.size() - 1).replace(' ', '_') + " INTEGER );");
 
         db.execSQL(SQL_CREATE_ENTRIES);
         Toast.makeText(context, "Students Added", Toast.LENGTH_SHORT).show();
@@ -109,12 +137,12 @@ public class DbInteract
                 new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()));
 
         for (int i = 0; i < names.size() - 1; i++)
-            values.put(names.get(i).replace(' ','_'), attendance.get(i));
+            values.put(names.get(i).replace(' ', '_'), attendance.get(i));
 
         db.insert(eventDBcontract.ListofItem.tableName1, null, values);
 
         Toast.makeText(context, "Attendance Complete", Toast.LENGTH_SHORT).show();
-        Log.d(tag,"Attendance Complete");
+        Log.d(tag, "Attendance Complete");
     }
 
     public void deleteAttendance()

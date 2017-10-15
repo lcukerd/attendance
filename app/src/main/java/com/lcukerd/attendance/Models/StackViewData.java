@@ -11,6 +11,7 @@ public class StackViewData
 
     public StackViewData(String name,int rollno)
     {
+        name = name.replace('_',' ');
         this.name= name;
         this.rollno = rollno;
     }

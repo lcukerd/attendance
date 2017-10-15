@@ -19,7 +19,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:text="5"
-                android:textSize="150sp"/>
+                android:textSize="200sp"/>
 
             <TextView
                 android:id="@+id/nameT"
@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rollnoT"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="150dp"
+                android:layout_marginTop="19dp"
                 android:text="Harshit Kumar"
                 android:textSize="30sp"/>
 

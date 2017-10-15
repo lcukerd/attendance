@@ -1,5 +1,6 @@
 package com.lcukerd.attendance.Activities;
 
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lcukerd.attendance.Database.DbInteract;
 import com.lcukerd.attendance.Models.StackViewData;
@@ -58,7 +60,7 @@ public class StudentRegister extends AppCompatActivity
         mRegisterAdapter = new ArrayAdapter<>(
                 this, R.layout.list_item, R.id.list_item_textView, new ArrayList<String>());
 
-        ArrayList<StackViewData> stackViewDatas = interact.readReport();
+        ArrayList<StackViewData> stackViewDatas = (ArrayList<StackViewData>) interact.readReport(0);
         for (StackViewData temp:stackViewDatas)
             mRegisterAdapter.add(temp.name);
 
@@ -93,7 +95,15 @@ public class StudentRegister extends AppCompatActivity
             ArrayList<String> arrayList = new ArrayList<>();
             for (int i=0;i<mRegisterAdapter.getCount();i++)
                 arrayList.add(toTitleCase(mRegisterAdapter.getItem(i)));
-            interact.createtable(arrayList);
+            try
+            {
+                interact.createtable(arrayList);
+            }
+            catch (SQLiteException e)
+            {
+                Toast.makeText(this, "Duplicate Column", Toast.LENGTH_SHORT).show();
+                Log.e(tag,"Duplicate Column",e);
+            }
             return true;
         }
 

@@ -12,16 +12,20 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lcukerd.attendance.Adapters.GridViewAdapter;
 import com.lcukerd.attendance.Adapters.StackViewAdapter;
 import com.lcukerd.attendance.Database.DbInteract;
+import com.lcukerd.attendance.Models.GridViewData;
 import com.lcukerd.attendance.Models.StackViewData;
 import com.lcukerd.attendance.R;
 
@@ -51,13 +55,12 @@ public class MainActivity extends AppCompatActivity
         {
             showregister();
             prefs.edit().putBoolean("intialLaunch", false).commit();
-        }
-        else
+        } else
         {
             if (prefs.getBoolean("intialCardLaunch", true))
             {
-                Toast.makeText(this, "Swipe Card right to mark present else left.", Toast.LENGTH_SHORT).show();
-                prefs.edit().putBoolean("intialLaunch", false).commit();
+                Toast.makeText(this, "Swipe Card right to mark present else left.", Toast.LENGTH_LONG).show();
+                prefs.edit().putBoolean("intialCardLaunch", false).commit();
             }
         }
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -85,8 +88,7 @@ public class MainActivity extends AppCompatActivity
         {
             showregister();
             return true;
-        }
-        else if (id == R.id.retake)
+        } else if (id == R.id.retake)
         {
             interact.deleteAttendance();
             recreate();
@@ -137,17 +139,18 @@ public class MainActivity extends AppCompatActivity
 
                 ArrayList<StackViewData> stackViewDatas = new ArrayList<>();
                 attendance = new ArrayList<>();
-                if (!interact.attendanceTaken())
+
+                try
                 {
-                    try
+                    if (!interact.attendanceTaken())
                     {
-                        stackViewDatas = interact.readReport();
-                    } catch (SQLiteException e)
-                    {
-                        e.printStackTrace();
-                        ((TextView) getView().findViewById(R.id.comment))
-                                .setText("Add students in register (menu icon)");
+                        stackViewDatas = (ArrayList<StackViewData>) interact.readReport(0);
                     }
+                } catch (SQLiteException e)
+                {
+                    e.printStackTrace();
+                    ((TextView) getView().findViewById(R.id.comment))
+                            .setText("Add students in register (menu icon)");
                 }
                 StackViewAdapter stackViewAdapter = new StackViewAdapter(getContext(), stackViewDatas);
                 swipeStack.setAdapter(stackViewAdapter);
@@ -186,6 +189,18 @@ public class MainActivity extends AppCompatActivity
                 });
             } else
             {
+                GridView gridView = getView().findViewById(R.id.gridView);
+                try
+                {
+                    GridViewAdapter adapter = new GridViewAdapter(getContext(),
+                            (ArrayList<GridViewData>) interact.readReport(1));
+                    gridView.setAdapter(adapter);
+                }
+                catch (SQLiteException e)
+                {
+                    startActivity(new Intent(getContext(), StudentRegister.class));
+                    Log.e(tag,"Table not found",e);
+                }
 
             }
         }
