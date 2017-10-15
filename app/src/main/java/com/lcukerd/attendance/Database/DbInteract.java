@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.lcukerd.attendance.Models.StackViewData;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -22,31 +25,34 @@ public class DbInteract
     private String[] projection = {
             eventDBcontract.ListofItem.columnName
     };
-    private static String TAG = DbInteract.class.getSimpleName();
+    private static String tag = DbInteract.class.getSimpleName();
+    private Context context;
 
     public DbInteract(Context context)
     {
+        this.context = context;
         dBcontract = new eventDBcontract(context);
     }
 
-    /*public ArrayList<Integer> readReport()
+    public ArrayList<StackViewData> readReport()
     {
         SQLiteDatabase db = dBcontract.getReadableDatabase();
-        Cursor cursor = db.query(eventDBcontract.ListofItem.tableName1, projection1, null, null, null, null, null);
-        ArrayList<User> usernames = new ArrayList<>();
+        Cursor cursor = db.query(eventDBcontract.ListofItem.tableName2,
+                projection, null, null, null, null, eventDBcontract.ListofItem.columnName + " ASC");
+        ArrayList<StackViewData> students = new ArrayList<>();
         while (cursor.moveToNext())
-            usernames.add(new User(getImage(cursor.getBlob(cursor.getColumnIndex(eventDBcontract.ListofItem.columnimage))),
-                    cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnuser)),
-                    cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnurl)),
-                    cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnquery))));
-
-        Log.d(TAG, "Returned " + String.valueOf(cursor.getCount()) + " usernames");
-        return (usernames);
-    }*/
+            students.add(new StackViewData
+                    (cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)),
+                            cursor.getPosition()+1));
+        Log.d(tag, "Returned " + String.valueOf(cursor.getCount()) + " students");
+        return students;
+    }
 
     public void createtable(ArrayList<String> names)
     {
         SQLiteDatabase db = dBcontract.getWritableDatabase();
+        db.delete(eventDBcontract.ListofItem.tableName2,null,null);
+        db.execSQL("DROP TABLE IF EXISTS " + eventDBcontract.ListofItem.tableName1);
 
         for (int i = 0; i < names.size(); i++)
         {
@@ -57,7 +63,7 @@ public class DbInteract
 
         Cursor cursor = db.query(eventDBcontract.ListofItem.tableName2,
                 new String[]{eventDBcontract.ListofItem.columnName}, null, null, null, null,
-                eventDBcontract.ListofItem.columnName + "ASC");
+                eventDBcontract.ListofItem.columnName + " ASC");
 
         names.clear();
         while (cursor.moveToNext())
@@ -66,12 +72,24 @@ public class DbInteract
         String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + eventDBcontract.ListofItem.tableName1 + " (" +
                         eventDBcontract.ListofItem.columndate + " INTEGER, ";
+        String temp=null;
         for (int i = 0; i < names.size() - 1; i++)
-            SQL_CREATE_ENTRIES += (names.get(i) + " INTEGER, ");
+        {
+            if (names.get(i).equals(temp))
+            {
+                temp = names.get(i).replace(' ','_');
+                temp = "m_" + temp;
+            }
+            else
+                temp = names.get(i).replace(' ','_');
+            SQL_CREATE_ENTRIES += (temp + " INTEGER, ");
+        }
 
         SQL_CREATE_ENTRIES += (names.get(names.size() - 1) + " INTEGER );");
 
         db.execSQL(SQL_CREATE_ENTRIES);
+        Toast.makeText(context, "Students Added", Toast.LENGTH_SHORT).show();
+        Log.d(tag, "Table Created with " + String.valueOf(names.size()) + " students");
     }
 
     public void markAttendance(ArrayList<Integer> attendance)
@@ -81,7 +99,7 @@ public class DbInteract
 
         Cursor cursor = db.query(eventDBcontract.ListofItem.tableName2,
                 projection, null, null, null, null,
-                eventDBcontract.ListofItem.columnName + "ASC");
+                eventDBcontract.ListofItem.columnName + " ASC");
 
         while (cursor.moveToNext())
             names.add(cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)));
@@ -91,10 +109,37 @@ public class DbInteract
                 new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()));
 
         for (int i = 0; i < names.size() - 1; i++)
-            values.put(names.get(i), attendance.get(i));
+            values.put(names.get(i).replace(' ','_'), attendance.get(i));
 
         db.insert(eventDBcontract.ListofItem.tableName1, null, values);
+
+        Toast.makeText(context, "Attendance Complete", Toast.LENGTH_SHORT).show();
+        Log.d(tag,"Attendance Complete");
     }
+
+    public void deleteAttendance()
+    {
+        SQLiteDatabase db = dBcontract.getWritableDatabase();
+        Log.d(tag, "Delete Today's Attendance" + String.valueOf(db.delete(eventDBcontract.ListofItem.tableName1,
+                eventDBcontract.ListofItem.columndate + " = '" +
+                        new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()) +
+                        "'", null)));
+    }
+
+    public boolean attendanceTaken()
+    {
+        SQLiteDatabase db = dBcontract.getReadableDatabase();
+        boolean taken = false;
+        Cursor cursor = db.query(eventDBcontract.ListofItem.tableName1,
+                null, eventDBcontract.ListofItem.columndate + " = ?",
+                new String[]{new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime())},
+                null, null, null);
+        if (cursor.getCount() != 0)
+            taken = true;
+        Log.d(tag, "Attandance Taken " + String.valueOf(taken));
+        return taken;
+    }
+
 
     /*public void adduser(Bitmap profilePic, String username, String url, String query)
     {

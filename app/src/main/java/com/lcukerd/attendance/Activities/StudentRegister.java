@@ -1,13 +1,12 @@
 package com.lcukerd.attendance.Activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -16,14 +15,17 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.lcukerd.attendance.Database.DbInteract;
+import com.lcukerd.attendance.Models.StackViewData;
 import com.lcukerd.attendance.R;
 
 import java.util.ArrayList;
 
 public class StudentRegister extends AppCompatActivity
 {
-    private ArrayAdapter<String> mForecastAdapter;
+    private ArrayAdapter<String> mRegisterAdapter;
     private static final String tag = StudentRegister.class.getSimpleName();
+    private DbInteract interact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -33,6 +35,7 @@ public class StudentRegister extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        interact = new DbInteract(this);
         EditText addName = (EditText) findViewById(R.id.addName);
         addName.setOnEditorActionListener(new EditText.OnEditorActionListener()
         {
@@ -45,28 +48,84 @@ public class StudentRegister extends AppCompatActivity
                         || actionId == EditorInfo.IME_ACTION_SEND)
                         && exampleView.getText().toString().equals("") == false)
                 {
-                    mForecastAdapter.add(exampleView.getText().toString());
-                    mForecastAdapter.notifyDataSetChanged();
+                    mRegisterAdapter.add(exampleView.getText().toString());
+                    mRegisterAdapter.notifyDataSetChanged();
                     exampleView.setText("");
                 }
                 return true;
             }
         });
-        mForecastAdapter = new ArrayAdapter<>(
+        mRegisterAdapter = new ArrayAdapter<>(
                 this, R.layout.list_item, R.id.list_item_textView, new ArrayList<String>());
 
+        ArrayList<StackViewData> stackViewDatas = interact.readReport();
+        for (StackViewData temp:stackViewDatas)
+            mRegisterAdapter.add(temp.name);
+
         ListView listView = (ListView) findViewById(R.id.register);
-        listView.setAdapter(mForecastAdapter);
+        listView.setAdapter(mRegisterAdapter);
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
         {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l)
             {
-                Log.d(tag, mForecastAdapter.getItem(i));
-                mForecastAdapter.remove(mForecastAdapter.getItem(i));
+                Log.d(tag, mRegisterAdapter.getItem(i));
+                mRegisterAdapter.remove(mRegisterAdapter.getItem(i));
                 return true;
             }
         });
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_register, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+
+        if (id == R.id.done)
+        {
+            ArrayList<String> arrayList = new ArrayList<>();
+            for (int i=0;i<mRegisterAdapter.getCount();i++)
+                arrayList.add(toTitleCase(mRegisterAdapter.getItem(i)));
+            interact.createtable(arrayList);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    private String toTitleCase(String str) {
+
+        if (str == null) {
+            return null;
+        }
+
+        boolean space = true;
+        StringBuilder builder = new StringBuilder(str);
+        final int len = builder.length();
+
+        for (int i = 0; i < len; ++i) {
+            char c = builder.charAt(i);
+            if (space) {
+                if (!Character.isWhitespace(c)) {
+                    // Convert to title case and switch out of whitespace mode.
+                    builder.setCharAt(i, Character.toTitleCase(c));
+                    space = false;
+                }
+            } else if (Character.isWhitespace(c)) {
+                space = true;
+            } else {
+                builder.setCharAt(i, Character.toLowerCase(c));
+            }
+        }
+
+        return builder.toString();
+    }
+
 
 }

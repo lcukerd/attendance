@@ -5,6 +5,12 @@
     <item
         android:id="@+id/create_list"
         android:orderInCategory="100"
+        android:icon="@drawable/ic_assignment_ind_white_24dp"
         android:title="@string/action_create_list"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/retake"
+        android:orderInCategory="101"
+        android:title="Retake Today's Attendance"
         app:showAsAction="never"/>
 </menu>

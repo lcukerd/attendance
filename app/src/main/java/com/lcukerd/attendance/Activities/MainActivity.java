@@ -2,23 +2,21 @@ package com.lcukerd.attendance.Activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +34,7 @@ public class MainActivity extends AppCompatActivity
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+    private static DbInteract interact;
     private static final String tag = MainActivity.class.getSimpleName();
 
     @Override
@@ -46,11 +45,20 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        interact = new DbInteract(this);
         SharedPreferences prefs = getSharedPreferences("com.lcukerd.attendance", MODE_PRIVATE);
         if (prefs.getBoolean("intialLaunch", true))
         {
             showregister();
             prefs.edit().putBoolean("intialLaunch", false).commit();
+        }
+        else
+        {
+            if (prefs.getBoolean("intialCardLaunch", true))
+            {
+                Toast.makeText(this, "Swipe Card right to mark present else left.", Toast.LENGTH_SHORT).show();
+                prefs.edit().putBoolean("intialLaunch", false).commit();
+            }
         }
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -78,19 +86,23 @@ public class MainActivity extends AppCompatActivity
             showregister();
             return true;
         }
+        else if (id == R.id.retake)
+        {
+            interact.deleteAttendance();
+            recreate();
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
     private void showregister()
     {
-        startActivity(new Intent(this,StudentRegister.class));
+        startActivity(new Intent(this, StudentRegister.class));
     }
 
     public static class PlaceholderFragment extends Fragment implements SwipeStack.SwipeStackListener
     {
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private DbInteract interact;
         private ArrayList<Integer> attendance;
 
         public PlaceholderFragment()
@@ -119,14 +131,24 @@ public class MainActivity extends AppCompatActivity
         public void onStart()
         {
             super.onStart();
-            interact = new DbInteract(getContext());
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
             {
                 final SwipeStack swipeStack = getView().findViewById(R.id.stackT);
 
                 ArrayList<StackViewData> stackViewDatas = new ArrayList<>();
                 attendance = new ArrayList<>();
-                setuprollno(stackViewDatas);
+                if (!interact.attendanceTaken())
+                {
+                    try
+                    {
+                        stackViewDatas = interact.readReport();
+                    } catch (SQLiteException e)
+                    {
+                        e.printStackTrace();
+                        ((TextView) getView().findViewById(R.id.comment))
+                                .setText("Add students in register (menu icon)");
+                    }
+                }
                 StackViewAdapter stackViewAdapter = new StackViewAdapter(getContext(), stackViewDatas);
                 swipeStack.setAdapter(stackViewAdapter);
                 swipeStack.setListener(this);
@@ -143,7 +165,6 @@ public class MainActivity extends AppCompatActivity
                     {
                         View v = swipeStack.getTopView();
                         TextView cmt = v.findViewById(R.id.cmtT);
-                        Log.i(tag, String.valueOf(progress));
                         if (progress > 0)
                         {
                             cmt.setText("P");
@@ -160,7 +181,6 @@ public class MainActivity extends AppCompatActivity
                     public void onSwipeEnd(int position)
                     {
                         View v = swipeStack.getTopView();
-                        Log.i(tag, "Swipe End");
                         v.findViewById(R.id.cmtT).setAlpha(0);
                     }
                 });
@@ -170,34 +190,22 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        private void setuprollno(ArrayList<StackViewData> stackViewDatas)
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                StackViewData temp = new StackViewData("abc", i);
-                stackViewDatas.add(temp);
-            }
-        }
-
         @Override
         public void onViewSwipedToRight(int position)
         {
             attendance.add(1);
-            Toast.makeText(getContext(), "Right " + String.valueOf(position), Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onViewSwipedToLeft(int position)
         {
             attendance.add(0);
-            Toast.makeText(getContext(), "Left", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onStackEmpty()
         {
             interact.markAttendance(attendance);
-            Toast.makeText(getContext(), "Empty", Toast.LENGTH_SHORT).show();
         }
 
 
