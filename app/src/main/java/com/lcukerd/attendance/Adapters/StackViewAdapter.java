@@ -26,12 +26,17 @@ import java.util.zip.Inflater;
 public class StackViewAdapter extends BaseAdapter
 {
     private ArrayList<StackViewData> stackViewDatas;
+    private ArrayList<StackViewData> temp;
     private LayoutInflater mInflater;
+    private int rollbackamt=0;
+    private static final String tag = StackViewAdapter.class.getSimpleName();
 
     public StackViewAdapter(Context context,ArrayList<StackViewData> stackViewDatas)
     {
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.stackViewDatas = stackViewDatas;
+        temp = new ArrayList<>();
+        temp.addAll(stackViewDatas);
     }
 
     private static class ViewHolder
@@ -61,6 +66,15 @@ public class StackViewAdapter extends BaseAdapter
         holder.name.setText(current.name);
         holder.rollno.setText(String.valueOf(current.rollno));
         return convertView;
+    }
+
+    public void rollback(int pos)
+    {
+        stackViewDatas.clear();
+        Log.d(tag,String.valueOf(pos));
+        for (; pos<temp.size();pos++)
+            stackViewDatas.add(temp.get(pos));
+        notifyDataSetInvalidated();
     }
 
     @Override

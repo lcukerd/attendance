@@ -11,6 +11,8 @@
         android:layout_above="@+id/rellayout"
         android:layout_marginTop="5dp"
         android:gravity="center"
+        android:horizontalSpacing="1dp"
+        android:verticalSpacing="1dp"
         android:numColumns="6"
         android:stretchMode="columnWidth"/>
 

@@ -1,6 +1,9 @@
 package com.lcukerd.attendance.Adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,14 +11,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lcukerd.attendance.Database.DbInteract;
 import com.lcukerd.attendance.Models.GridViewData;
+import com.lcukerd.attendance.Models.OneDayDecorator;
 import com.lcukerd.attendance.R;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by Programmer on 15-10-2017.
@@ -71,20 +79,30 @@ public class GridViewAdapter extends BaseAdapter
         holder.rollnoV.setText(String.valueOf(gridViewDatas.get(position).rollno));
         holder.percV.setText(String.valueOf(gridViewDatas.get(position).Aperc)+"%");
         convertView.setBackgroundColor(backColor(gridViewDatas.get(position).Aperc));
-        //convertView.setBackgroundColor(backColor(position*10));
-/*        convertView.setOnClickListener(new View.OnClickListener()
+        convertView.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                Intent intent = new Intent(mContext, SwipePic.class);
-                intent.putExtra("id", idurl);
-                intent.putExtra("position", position);
-                mContext.startActivity(intent);
+                scheduler();
             }
-        });*/
+        });
 
         return convertView;
+    }
+
+    private void scheduler()
+    {
+        final AlertDialog.Builder detail = new AlertDialog.Builder(mContext,R.style.dialogStyle);
+        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
+        View dialogb = inflater.inflate(R.layout.detailattendance, null);
+        detail.setView(dialogb);
+        final AlertDialog dialog = detail.create();
+        dialog.setTitle("Harshit's Attendance");
+        dialog.show();
+        MaterialCalendarView calendarView = dialogb.findViewById(R.id.calendarView);
+        OneDayDecorator decorator = new OneDayDecorator(new Date(System.currentTimeMillis()));
+        calendarView.addDecorator(decorator);
     }
 
     private int backColor(int perc)

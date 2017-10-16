@@ -1,5 +1,11 @@
 package com.lcukerd.attendance.Activities;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
@@ -19,8 +25,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.lcukerd.attendance.Adapters.GridViewAdapter;
@@ -31,7 +40,9 @@ import com.lcukerd.attendance.Models.GridViewData;
 import com.lcukerd.attendance.Models.StackViewData;
 import com.lcukerd.attendance.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import link.fls.swipestack.SwipeStack;
 
@@ -93,10 +104,12 @@ public class MainActivity extends AppCompatActivity
         {
             showregister();
             return true;
-        } else if (id == R.id.retake)
+        }
+        else if (id == R.id.retake)
         {
             interact.deleteAttendance();
             recreate();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -112,6 +125,8 @@ public class MainActivity extends AppCompatActivity
         private static final String ARG_SECTION_NUMBER = "section_number";
         private ArrayList<Integer> attendance;
         private CountDownTimer timer = null;
+        private SwipeStack swipeStack;
+        private StackViewAdapter stackViewAdapter;
 
         public PlaceholderFragment()
         {
@@ -130,6 +145,7 @@ public class MainActivity extends AppCompatActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState)
         {
+            setHasOptionsMenu(true);
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
                 return inflater.inflate(R.layout.taker, container, false);
             else
@@ -141,7 +157,7 @@ public class MainActivity extends AppCompatActivity
             super.onStart();
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
             {
-                final SwipeStack swipeStack = getView().findViewById(R.id.stackT);
+                swipeStack = getView().findViewById(R.id.stackT);
 
                 ArrayList<StackViewData> stackViewDatas = new ArrayList<>();
                 attendance = new ArrayList<>();
@@ -158,7 +174,7 @@ public class MainActivity extends AppCompatActivity
                     ((TextView) getView().findViewById(R.id.comment))
                             .setText("Add students in register (menu icon)");
                 }
-                StackViewAdapter stackViewAdapter = new StackViewAdapter(getContext(), stackViewDatas);
+                stackViewAdapter = new StackViewAdapter(getContext(), stackViewDatas);
                 swipeStack.setAdapter(stackViewAdapter);
                 swipeStack.setListener(this);
                 swipeStack.setSwipeProgressListener(new SwipeStack.SwipeProgressListener()
@@ -226,6 +242,27 @@ public class MainActivity extends AppCompatActivity
                 }
 
             }
+        }
+
+
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.retake_rollno:
+                    if (!((TextView)swipeStack.getTopView().findViewById(R.id.rollnoT))
+                            .getText().equals("1"))
+                    {
+                        attendance.remove(attendance.size()-1);
+                        stackViewAdapter.rollback(attendance.size());
+                        swipeStack.resetStack();
+                    }
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
         }
 
         @Override
