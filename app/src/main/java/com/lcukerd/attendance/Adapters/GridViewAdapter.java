@@ -42,7 +42,7 @@ public class GridViewAdapter extends BaseAdapter
 
     private static class ViewHolder
     {
-        TextView nameV, rollnoV;
+        TextView nameV, rollnoV, percV;
     }
 
     @NonNull
@@ -56,6 +56,7 @@ public class GridViewAdapter extends BaseAdapter
             holder = new ViewHolder();
             holder.nameV = convertView.findViewById(R.id.nameGrid);
             holder.rollnoV = convertView.findViewById(R.id.rollnoGrid);
+            holder.percV = convertView.findViewById(R.id.percGrid);
 
             convertView.setTag(holder);
         } else
@@ -68,6 +69,7 @@ public class GridViewAdapter extends BaseAdapter
         else
             holder.nameV.setText(currName);
         holder.rollnoV.setText(String.valueOf(gridViewDatas.get(position).rollno));
+        holder.percV.setText(String.valueOf(gridViewDatas.get(position).Aperc)+"%");
         convertView.setBackgroundColor(backColor(gridViewDatas.get(position).Aperc));
         //convertView.setBackgroundColor(backColor(position*10));
 /*        convertView.setOnClickListener(new View.OnClickListener()

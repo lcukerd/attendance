@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import com.lcukerd.attendance.Adapters.GridViewAdapter;
 import com.lcukerd.attendance.Adapters.StackViewAdapter;
 import com.lcukerd.attendance.Database.DbInteract;
+import com.lcukerd.attendance.Models.CustomViewPager;
 import com.lcukerd.attendance.Models.GridViewData;
 import com.lcukerd.attendance.Models.StackViewData;
 import com.lcukerd.attendance.R;
@@ -37,8 +39,9 @@ public class MainActivity extends AppCompatActivity
 {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
+    private static CustomViewPager mViewPager;
     private static DbInteract interact;
+    private static MenuItem retake_rollno;
     private static final String tag = MainActivity.class.getSimpleName();
 
     @Override
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (CustomViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -75,7 +78,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        retake_rollno = menu.findItem(R.id.retake_rollno);
         return true;
     }
 
@@ -106,6 +111,7 @@ public class MainActivity extends AppCompatActivity
     {
         private static final String ARG_SECTION_NUMBER = "section_number";
         private ArrayList<Integer> attendance;
+        private CountDownTimer timer = null;
 
         public PlaceholderFragment()
         {
@@ -160,7 +166,24 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onSwipeStart(int position)
                     {
+                        retake_rollno.setVisible(true);
+                        try
+                        {
+                            timer.cancel();
+                        }
+                        catch (NullPointerException e)
+                        {
+                            Log.e(tag,"First Swipe");
+                        }
+                        mViewPager.setPagingEnabled(false);
+                        timer = new CountDownTimer(1000, 1000) {
+                            public void onTick(long millisUntilFinished) {
+                            }
 
+                            public void onFinish() {
+                                mViewPager.setPagingEnabled(true);
+                            }
+                        }.start();
                     }
 
                     @Override
@@ -220,7 +243,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onStackEmpty()
         {
+            retake_rollno.setVisible(false);
             interact.markAttendance(attendance);
+            getActivity().recreate();
         }
 
 
@@ -258,5 +283,6 @@ public class MainActivity extends AppCompatActivity
             }
             return null;
         }
+
     }
 }

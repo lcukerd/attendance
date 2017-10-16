@@ -9,6 +9,13 @@
         android:title="@string/action_create_list"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/retake_rollno"
+        android:icon="@android:drawable/ic_media_rew"
+        android:orderInCategory="99"
+        android:visible="false"
+        android:title="Retake last rollno"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/retake"
         android:orderInCategory="101"
         android:title="Retake Today's Attendance"

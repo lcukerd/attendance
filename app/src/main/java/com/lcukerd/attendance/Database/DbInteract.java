@@ -74,6 +74,7 @@ public class DbInteract
         while (cursor.moveToNext())
             if (cursor.getInt(cursor.getColumnIndex(name)) == 1)
                 present++;
+        Log.d(tag,String.valueOf(total) + "Total : Present" + String.valueOf(present));
         if (total==0)
             return 0;
         else
