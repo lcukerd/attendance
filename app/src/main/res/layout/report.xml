@@ -8,13 +8,23 @@
         android:id="@+id/gridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/rellayout"
-        android:layout_marginTop="5dp"
         android:gravity="center"
         android:horizontalSpacing="1dp"
         android:verticalSpacing="1dp"
         android:numColumns="6"
-        android:stretchMode="columnWidth"/>
+        android:stretchMode="columnWidth"
+        android:layout_above="@+id/rellayout"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/rellayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
+        android:hint="Tap on tile for Detailed view."/>
+
 
     <RelativeLayout
         android:id="@+id/rellayout"
@@ -30,11 +40,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="11dp"
             android:layout_toStartOf="@+id/textView2"
-            android:text="0%"
-            android:textColor="#f44336"
-            />
+            android:text="-"/>
 
         <TextView
             android:id="@+id/textView2"
@@ -42,17 +50,38 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/textView"
             android:layout_centerHorizontal="true"
-            android:text="-"/>
+            android:textColor="#a07943"
+            android:text="50%"/>
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0%"
+            android:textColor="#f44336"
+            android:layout_alignBottom="@+id/textView"
+            android:layout_toStartOf="@+id/textView"
+            android:layout_marginEnd="11dp"/>
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="11dp"
             android:layout_toEndOf="@+id/textView2"
+            android:text="-"/>
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/textView"
+            android:layout_marginStart="11dp"
+            android:layout_toEndOf="@+id/textView4"
             android:text="100%"
             android:textColor="#4caf50"
             />
     </RelativeLayout>
+
+
 </RelativeLayout>

@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Random;
 
 /**
  * Created by Programmer on 14-10-2017.
@@ -54,33 +55,55 @@ public class DbInteract
         } else if (n == 1)
         {
             students1 = new ArrayList<>();
+            int count = 0;
+            String temp = "-1";
             while (cursor.moveToNext())
-                students1.add(new GridViewData
-                        (cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)),
-                                cursor.getPosition() + 1, getAPerc(cursor.getString(
-                                cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)), db)));
+            {
+                String name = cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName));
+                ;
+                if (name.equals(temp))
+                {
+                    count++;
+                    name = temp + String.valueOf(count);
+                } else
+                {
+                    count = 0;
+                    temp = name;
+                }
+                students1.add(new GridViewData(name, cursor.getPosition() + 1,
+                        getAPerc(cursor.getString(cursor.getColumnIndex(
+                                eventDBcontract.ListofItem.columnName)), db)));
+            }
             Log.d(tag, "Returned " + String.valueOf(cursor.getCount()) + " students");
             return students1;
         }
         return null;
     }
 
+    public Cursor readStudentReport(String name)
+    {
+        SQLiteDatabase db = dBcontract.getReadableDatabase();
+        Cursor cursor = db.query(eventDBcontract.ListofItem.tableName1,
+                new String[]{eventDBcontract.ListofItem.columndate, name}, null, null, null, null,
+                eventDBcontract.ListofItem.columndate + " ASC");
+        Log.d(tag, "Returned " + String.valueOf(cursor.getCount()) + " Days data");
+        return cursor;
+    }
+
     private int getAPerc(String name, SQLiteDatabase db)
     {
         Cursor cursor = db.query(eventDBcontract.ListofItem.tableName1,
                 new String[]{name}, null, null, null, null, null);
-        int total = cursor.getCount();
-        int present = 0;
+        float total = cursor.getCount();
+        float present = 0;
         while (cursor.moveToNext())
             if (cursor.getInt(cursor.getColumnIndex(name)) == 1)
                 present++;
-        Log.d(tag,String.valueOf(total) + "Total : Present" + String.valueOf(present));
-        if (total==0)
+        if (total == 0)
             return 0;
         else
-            return present / total*100;
+            return (int) (present / total * 100);
     }
-
 
     public void createtable(ArrayList<String> names)
     {
@@ -107,21 +130,41 @@ public class DbInteract
         String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + eventDBcontract.ListofItem.tableName1 + " (" +
                         eventDBcontract.ListofItem.columndate + " INTEGER, ";
-        String temp = null;
+
+        solveDuplicacy(names);
         for (int i = 0; i < names.size() - 1; i++)
-        {
-            temp = names.get(i);
-            SQL_CREATE_ENTRIES += (temp + " INTEGER, ");
-        }
+            SQL_CREATE_ENTRIES += (names.get(i) + " INTEGER, ");
 
         SQL_CREATE_ENTRIES += (names.get(names.size() - 1).replace(' ', '_') + " INTEGER );");
 
         db.execSQL(SQL_CREATE_ENTRIES);
-        Toast.makeText(context, "Students Added", Toast.LENGTH_SHORT).show();
+        adddummyData(names.size());
+        Toast.makeText(context, "Students Added. Press back button.", Toast.LENGTH_SHORT).show();
         Log.d(tag, "Table Created with " + String.valueOf(names.size()) + " students");
     }
 
-    public void markAttendance(ArrayList<Integer> attendance)
+    private void solveDuplicacy(ArrayList<String> names)
+    {
+        int count = 0;
+        String temp = "-1";
+        for (int i = 0; i < names.size(); i++)
+        {
+            if (names.get(i).equals(temp))
+            {
+                count++;
+                names.remove(i);
+                names.add(i, temp + String.valueOf(count));
+            } else
+            {
+                count = 0;
+                temp = names.get(i);
+            }
+        }
+
+    }
+
+
+    public void markAttendance(ArrayList<Integer> attendance, int date)
     {
         SQLiteDatabase db = dBcontract.getWritableDatabase();
         ArrayList<String> names = new ArrayList<>();
@@ -134,15 +177,19 @@ public class DbInteract
             names.add(cursor.getString(cursor.getColumnIndex(eventDBcontract.ListofItem.columnName)));
 
         ContentValues values = new ContentValues();
-        values.put(eventDBcontract.ListofItem.columndate,
-                new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()));
-
-        for (int i = 0; i < names.size() - 1; i++)
+        if (date == 0)
+            values.put(eventDBcontract.ListofItem.columndate,
+                    new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()));
+        else
+            values.put(eventDBcontract.ListofItem.columndate, date);
+        solveDuplicacy(names);
+        for (int i = 0; i < names.size(); i++)
             values.put(names.get(i).replace(' ', '_'), attendance.get(i));
 
         db.insert(eventDBcontract.ListofItem.tableName1, null, values);
 
-        Toast.makeText(context, "Attendance Complete", Toast.LENGTH_SHORT).show();
+        if (date == 0)
+            Toast.makeText(context, "Attendance Complete", Toast.LENGTH_SHORT).show();
         Log.d(tag, "Attendance Complete");
     }
 
@@ -167,6 +214,27 @@ public class DbInteract
             taken = true;
         Log.d(tag, "Attandance Taken " + String.valueOf(taken));
         return taken;
+    }
+
+    private void adddummyData(int count)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -30);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        int date;
+        Random r = new Random();
+
+        for (int i = 0; i < 28; i++)
+        {
+            date = Integer.parseInt(sdf.format(calendar.getTime()));
+            ArrayList<Integer> att = new ArrayList<>();
+            for (int j = 0; j < count; j++)
+            {
+                att.add(r.nextInt(2));
+            }
+            markAttendance(att, date);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
     }
 
 

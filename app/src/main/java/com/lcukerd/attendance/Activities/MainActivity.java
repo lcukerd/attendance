@@ -147,7 +147,12 @@ public class MainActivity extends AppCompatActivity
         {
             setHasOptionsMenu(true);
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
-                return inflater.inflate(R.layout.taker, container, false);
+            {
+                View view =inflater.inflate(R.layout.taker, container, false);
+                swipeStack = view.findViewById(R.id.stackT);
+                swipeStack.resetStack();
+                return view;
+            }
             else
                 return inflater.inflate(R.layout.report, container, false);
         }
@@ -157,8 +162,6 @@ public class MainActivity extends AppCompatActivity
             super.onStart();
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
             {
-                swipeStack = getView().findViewById(R.id.stackT);
-
                 ArrayList<StackViewData> stackViewDatas = new ArrayList<>();
                 attendance = new ArrayList<>();
 
@@ -281,7 +284,7 @@ public class MainActivity extends AppCompatActivity
         public void onStackEmpty()
         {
             retake_rollno.setVisible(false);
-            interact.markAttendance(attendance);
+            interact.markAttendance(attendance,0);
             getActivity().recreate();
         }
 

@@ -101,7 +101,7 @@ public class StudentRegister extends AppCompatActivity
             }
             catch (SQLiteException e)
             {
-                Toast.makeText(this, "Duplicate Column", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Special character not accepted", Toast.LENGTH_SHORT).show();
                 Log.e(tag,"Duplicate Column",e);
             }
             return true;
