@@ -1,5 +1,7 @@
 package com.lcukerd.attendance.Activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +40,7 @@ public class StudentRegister extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         interact = new DbInteract(this);
+        showdialog("Enter name of students.");
         EditText addName = (EditText) findViewById(R.id.addName);
         addName.setOnEditorActionListener(new EditText.OnEditorActionListener()
         {
@@ -109,6 +112,7 @@ public class StudentRegister extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+
     private String toTitleCase(String str) {
 
         if (str == null) {
@@ -135,6 +139,19 @@ public class StudentRegister extends AppCompatActivity
         }
 
         return builder.toString();
+    }
+
+    private void showdialog(String msg)
+    {
+        final AlertDialog.Builder instruct = new AlertDialog.Builder(this);
+        instruct.setMessage(msg)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog instructd = instruct.create();
+        instructd.show();
     }
 
 

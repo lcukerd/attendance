@@ -6,7 +6,7 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -16,8 +16,7 @@
                 android:id="@+id/rollnoT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
+                android:layout_centerInParent="true"
                 android:text="5"
                 android:textSize="200sp"/>
 
@@ -27,8 +26,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rollnoT"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="19dp"
-                android:text="Harshit Kumar"
+                android:text="abc"
                 android:textSize="30sp"/>
 
             <TextView

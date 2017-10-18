@@ -64,6 +64,15 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         interact = new DbInteract(this);
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mViewPager = (CustomViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
+    }
+    protected void onStart()
+    {
+        super.onStart();
         SharedPreferences prefs = getSharedPreferences("com.lcukerd.attendance", MODE_PRIVATE);
         if (prefs.getBoolean("intialLaunch", true))
         {
@@ -73,16 +82,27 @@ public class MainActivity extends AppCompatActivity
         {
             if (prefs.getBoolean("intialCardLaunch", true))
             {
-                Toast.makeText(this, "Swipe Card right to mark present else left.", Toast.LENGTH_LONG).show();
+                showdialog("Random attendance history for all students added to show functionality.");
+                showdialog("Swipe Card right to mark present else left.");
                 prefs.edit().putBoolean("intialCardLaunch", false).commit();
             }
         }
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        mViewPager = (CustomViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+    }
 
+
+    private void showdialog(String msg)
+    {
+        final AlertDialog.Builder instruct = new AlertDialog.Builder(this);
+        instruct.setMessage(msg)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int id)
+                    {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog instructd = instruct.create();
+        instructd.show();
     }
 
 
@@ -104,8 +124,7 @@ public class MainActivity extends AppCompatActivity
         {
             showregister();
             return true;
-        }
-        else if (id == R.id.retake)
+        } else if (id == R.id.retake)
         {
             interact.deleteAttendance();
             recreate();
@@ -148,12 +167,11 @@ public class MainActivity extends AppCompatActivity
             setHasOptionsMenu(true);
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
             {
-                View view =inflater.inflate(R.layout.taker, container, false);
+                View view = inflater.inflate(R.layout.taker, container, false);
                 swipeStack = view.findViewById(R.id.stackT);
                 swipeStack.resetStack();
                 return view;
-            }
-            else
+            } else
                 return inflater.inflate(R.layout.report, container, false);
         }
 
@@ -189,17 +207,19 @@ public class MainActivity extends AppCompatActivity
                         try
                         {
                             timer.cancel();
-                        }
-                        catch (NullPointerException e)
+                        } catch (NullPointerException e)
                         {
-                            Log.e(tag,"First Swipe");
+                            Log.e(tag, "First Swipe");
                         }
                         mViewPager.setPagingEnabled(false);
-                        timer = new CountDownTimer(1000, 1000) {
-                            public void onTick(long millisUntilFinished) {
+                        timer = new CountDownTimer(1000, 1000)
+                        {
+                            public void onTick(long millisUntilFinished)
+                            {
                             }
 
-                            public void onFinish() {
+                            public void onFinish()
+                            {
                                 mViewPager.setPagingEnabled(true);
                             }
                         }.start();
@@ -237,26 +257,26 @@ public class MainActivity extends AppCompatActivity
                     GridViewAdapter adapter = new GridViewAdapter(getContext(),
                             (ArrayList<GridViewData>) interact.readReport(1));
                     gridView.setAdapter(adapter);
-                }
-                catch (SQLiteException e)
+                } catch (SQLiteException e)
                 {
                     startActivity(new Intent(getContext(), StudentRegister.class));
-                    Log.e(tag,"Table not found",e);
+                    Log.e(tag, "Table not found", e);
                 }
 
             }
         }
 
 
-
         @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            switch (item.getItemId()) {
+        public boolean onOptionsItemSelected(MenuItem item)
+        {
+            switch (item.getItemId())
+            {
                 case R.id.retake_rollno:
-                    if (!((TextView)swipeStack.getTopView().findViewById(R.id.rollnoT))
+                    if (!((TextView) swipeStack.getTopView().findViewById(R.id.rollnoT))
                             .getText().equals("1"))
                     {
-                        attendance.remove(attendance.size()-1);
+                        attendance.remove(attendance.size() - 1);
                         stackViewAdapter.rollback(attendance.size());
                         swipeStack.resetStack();
                     }
@@ -284,7 +304,7 @@ public class MainActivity extends AppCompatActivity
         public void onStackEmpty()
         {
             retake_rollno.setVisible(false);
-            interact.markAttendance(attendance,0);
+            interact.markAttendance(attendance, 0);
             getActivity().recreate();
         }
 
