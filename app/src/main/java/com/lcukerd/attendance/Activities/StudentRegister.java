@@ -107,6 +107,10 @@ public class StudentRegister extends AppCompatActivity
                 Toast.makeText(this, "Special character not accepted", Toast.LENGTH_SHORT).show();
                 Log.e(tag,"Duplicate Column",e);
             }
+            catch (ArrayIndexOutOfBoundsException e)
+            {
+                Toast.makeText(this,"No students added!",Toast.LENGTH_SHORT).show();
+            }
             return true;
         }
 
